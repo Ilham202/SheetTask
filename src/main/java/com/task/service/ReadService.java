@@ -2,26 +2,17 @@ package com.task.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -30,7 +21,6 @@ import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gson.Gson;
 import com.task.model.CompareModel;
 import com.task.model.DataModel;
 import com.task.model.ESAModel;
@@ -44,6 +34,7 @@ public class ReadService {
 	List<ESAModel> emplist = new ArrayList<ESAModel>();
 	List<CompareModel> comparelist = new ArrayList<CompareModel>();
 
+	@SuppressWarnings("unchecked")
 	public List<JSONObject> readExcelData(MultipartFile file) {
 		List<JSONObject> datalist = new ArrayList<>();
 		try {
@@ -192,7 +183,7 @@ public class ReadService {
 			cmpmodel.setEmpName(summarylist.get(i).getName());
 			cmpmodel.setTsProjectBillableHours(emplist.get(i).getTsProjectBillableHours());
 			cmpmodel.setGrandTotalFromSummary(summarylist.get(i).getGrandTotal());
-			cmpmodel.setDifference((emplist.get(i).getTsProjectBillableHours() - (summarylist.get(i).getGrandTotal())));
+			cmpmodel.setDifference(Math.abs(emplist.get(i).getTsProjectBillableHours() - (summarylist.get(i).getGrandTotal())));
 			String[] date = emplist.get(i).getDateRange().split("-", 7);
 			cmpmodel.setFromDate(date[0] + "-".concat(date[1]) + "-".concat(date[2]));
 			cmpmodel.setToDate(date[3] + "-".concat(date[4]) + "-".concat(date[5]));
@@ -225,9 +216,9 @@ public class ReadService {
 				createList(user, row, style);
 
 			}
-			 DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-		     String currentDateTime = dateFormatter.format(new Date());
-		     String fileName = "newfile"+currentDateTime+".xlsx";
+//			 DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+//		     String currentDateTime = dateFormatter.format(new Date());
+//		     String fileName = "newfile"+currentDateTime+".xlsx";
 
 			FileOutputStream out = new FileOutputStream(new File("NewFile.xlsx"),true); // file name with path
 			workbook.write(out);
