@@ -1,23 +1,17 @@
 package com.task.service;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.apache.poi.ss.usermodel.Cell;
+
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,9 +19,13 @@ import com.task.model.CompareModel;
 import com.task.model.DataModel;
 import com.task.model.ESAModel;
 import com.task.model.SummeryModel;
+import com.task.repository.CompareRepository;
 
 @Service
 public class ReadService {
+	
+	@Autowired
+	private CompareRepository compareRepository;
 
 	List<DataModel> datalist = new ArrayList<DataModel>();
 	List<SummeryModel> summarylist = new ArrayList<SummeryModel>();
@@ -188,139 +186,16 @@ public class ReadService {
 			cmpmodel.setFromDate(date[0] + "-".concat(date[1]) + "-".concat(date[2]));
 			cmpmodel.setToDate(date[3] + "-".concat(date[4]) + "-".concat(date[5]));
 			comparelist1.add(cmpmodel);
+			compareRepository.save(cmpmodel);
+			
+			
 
 		}
 		comparelist.clear();
 		comparelist.addAll(comparelist1);
-		createExcelSheet();
+
 		return comparelist;
 	}
 
-	public boolean createExcelSheet() {
-		try {
-			XSSFWorkbook workbook = new XSSFWorkbook();
-
-			XSSFSheet sheet = workbook.createSheet("resultSheet");// creating a blank sheet
-			XSSFCellStyle style = workbook.createCellStyle();
-			style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-			style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-			
-			XSSFCellStyle headerstyle = workbook.createCellStyle();
-			headerstyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
-			headerstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-			
-			writeHeaderLine(sheet,headerstyle);
-			int rownum = 1;
-			for (CompareModel user : comparelist) {
-				Row row = sheet.createRow(rownum++);
-				createList(user, row, style);
-
-			}
-//			 DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-//		     String currentDateTime = dateFormatter.format(new Date());
-//		     String fileName = "newfile"+currentDateTime+".xlsx";
-
-			FileOutputStream out = new FileOutputStream(new File("NewFile.xlsx"),true); // file name with path
-			workbook.write(out);
-			out.close();
-			workbook.close();
-			return true;
-			
-		} catch (
-
-		Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-
-	}
-	private void writeHeaderLine(XSSFSheet sheet, XSSFCellStyle headerstyle) {
-		Row headrow = sheet.createRow(0);
-		Cell cell = headrow.createCell(0);
-
-		cell.setCellValue("EmpId");
-		cell.setCellStyle(headerstyle);
-
-		cell = headrow.createCell(1);
-		cell.setCellStyle(headerstyle);
-		cell.setCellValue("EmpName");
-
-		cell = headrow.createCell(2);
-		cell.setCellStyle(headerstyle);
-		cell.setCellValue("FromDate");
-
-		cell = headrow.createCell(3);
-		cell.setCellStyle(headerstyle);
-		cell.setCellValue("ToDate");
-
-		cell = headrow.createCell(4);
-		cell.setCellStyle(headerstyle);
-		cell.setCellValue("TsProjectBillableHours");
-
-		cell = headrow.createCell(5);
-		cell.setCellStyle(headerstyle);
-		cell.setCellValue("GrandTotalFromSummary");
-
-		cell = headrow.createCell(6);
-		cell.setCellStyle(headerstyle);
-		cell.setCellValue("Difference");
-		
-	}
-
-	private static void createList(CompareModel user, Row row, XSSFCellStyle style) // creating cells for each row
-	{
-		if (user.getDifference() != 0) {
-			Cell cell = row.createCell(0);
-			cell.setCellStyle(style);
-			cell.setCellValue(user.getEmpId());
-
-			cell = row.createCell(1);
-			cell.setCellStyle(style);
-			cell.setCellValue(user.getEmpName());
-
-			cell = row.createCell(2);
-			cell.setCellStyle(style);
-			cell.setCellValue(user.getFromDate());
-
-			cell = row.createCell(3);
-			cell.setCellStyle(style);
-			cell.setCellValue(user.getToDate());
-
-			cell = row.createCell(4);
-			cell.setCellStyle(style);
-			cell.setCellValue(user.getTsProjectBillableHours());
-
-			cell = row.createCell(5);
-			cell.setCellStyle(style);
-			cell.setCellValue(user.getGrandTotalFromSummary());
-
-			cell = row.createCell(6);
-			cell.setCellStyle(style);
-			cell.setCellValue(user.getDifference());
-		}else {
-			Cell cell = row.createCell(0);
-			cell.setCellValue(user.getEmpId());
-
-			cell = row.createCell(1);
-			cell.setCellValue(user.getEmpName());
-
-			cell = row.createCell(2);
-			cell.setCellValue(user.getFromDate());
-
-			cell = row.createCell(3);
-			cell.setCellValue(user.getToDate());
-
-			cell = row.createCell(4);
-			cell.setCellValue(user.getTsProjectBillableHours());
-
-			cell = row.createCell(5);
-			cell.setCellValue(user.getGrandTotalFromSummary());
-
-			cell = row.createCell(6);
-			cell.setCellValue(user.getDifference());
-			
-		}
-
-	}
-
+	
 }
