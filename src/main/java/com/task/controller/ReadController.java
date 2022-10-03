@@ -84,7 +84,7 @@ public class ReadController {
     public void exportToExcel(HttpServletResponse response) throws IOException {
 		response.setContentType("application/octet-stream");
 		
-		DateFormat dateFormatter = new SimpleDateFormat();
+		DateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
 		String currentDateTime = dateFormatter.format(new Date());
 		
 		String headerKey = "Content-Disposition";
