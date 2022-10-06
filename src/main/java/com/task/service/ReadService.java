@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -23,7 +24,7 @@ import com.task.repository.CompareRepository;
 
 @Service
 public class ReadService {
-	
+
 	@Autowired
 	private CompareRepository compareRepository;
 
@@ -71,8 +72,6 @@ public class ReadService {
 
 	}
 
-
-
 	public List<DataModel> readExcelDataModel(MultipartFile excel) throws IOException {
 		List<DataModel> datalist1 = new ArrayList<DataModel>();
 		XSSFWorkbook workbook = new XSSFWorkbook(excel.getInputStream());
@@ -106,11 +105,10 @@ public class ReadService {
 	}
 
 	public List<SummeryModel> readSheetModelData(MultipartFile excel) throws IOException {
-		List<SummeryModel> summarylist1 =new ArrayList<SummeryModel>();
+		List<SummeryModel> summarylist1 = new ArrayList<SummeryModel>();
 		XSSFWorkbook workbook = new XSSFWorkbook(excel.getInputStream());
 		XSSFSheet worksheet = workbook.getSheetAt(0);
-		
-		for (int i = 4; i <=worksheet.getPhysicalNumberOfRows(); i++) {
+		for (int i = 4; i <= worksheet.getPhysicalNumberOfRows(); i++) {
 			SummeryModel sheetmodel = new SummeryModel();
 			XSSFRow row = worksheet.getRow(i);
 			sheetmodel.setEmpId((int) row.getCell(0).getNumericCellValue());
@@ -123,12 +121,13 @@ public class ReadService {
 		}
 		summarylist.clear();
 		summarylist.addAll(summarylist1);
+		Collections.sort(summarylist,SummeryModel.sortBasedonEmpId);
 		workbook.close();
 		return summarylist;
 	}
 
 	public List<ESAModel> readEsaDataModel(MultipartFile excel) throws IOException {
-		List<ESAModel> emplist1 = new ArrayList<ESAModel>() ;
+		List<ESAModel> emplist1 = new ArrayList<ESAModel>();
 		XSSFWorkbook workbook = new XSSFWorkbook(excel.getInputStream());
 		XSSFSheet worksheet = workbook.getSheetAt(0);
 
@@ -161,34 +160,37 @@ public class ReadService {
 				empmodel.setCorrectionAtStore(row.getCell(20).getStringCellValue());
 				emplist1.add(empmodel);
 
-			} 
-		else {
+			} else {
 				break;
 			}
 		}
 		emplist.clear();
 		emplist.addAll(emplist1);
+		Collections.sort(emplist,ESAModel.empIdCompare);
 		workbook.close();
 		return emplist;
 	}
 
 	public List<CompareModel> compareSheets() throws IOException {
 		// TODO Auto-generated method stub
-		List<CompareModel> comparelist1= new ArrayList<CompareModel>();
+		List<CompareModel> comparelist1 = new ArrayList<CompareModel>();
 		for (int i = 0; i < summarylist.size(); i++) {
-			CompareModel cmpmodel = new CompareModel();
-			cmpmodel.setEmpId(summarylist.get(i).getEmpId());
-			cmpmodel.setEmpName(summarylist.get(i).getName());
-			cmpmodel.setTsProjectBillableHours(emplist.get(i).getTsProjectBillableHours());
-			cmpmodel.setGrandTotalFromSummary(summarylist.get(i).getGrandTotal());
-			cmpmodel.setDifference(Math.abs(emplist.get(i).getTsProjectBillableHours() - (summarylist.get(i).getGrandTotal())));
-			String[] date = emplist.get(i).getDateRange().split("-", 7);
-			cmpmodel.setFromDate(date[0] + "-".concat(date[1]) + "-".concat(date[2]));
-			cmpmodel.setToDate(date[3] + "-".concat(date[4]) + "-".concat(date[5]));
-			comparelist1.add(cmpmodel);
-			compareRepository.save(cmpmodel);
-			
-			
+			if (summarylist.get(i).getEmpId().equals(emplist.get(i).getEmpId())) {
+				CompareModel cmpmodel = new CompareModel();
+				cmpmodel.setEmpId(summarylist.get(i).getEmpId());
+				cmpmodel.setEmpName(summarylist.get(i).getName());
+				cmpmodel.setTsProjectBillableHours(emplist.get(i).getTsProjectBillableHours());
+				cmpmodel.setGrandTotalFromSummary(summarylist.get(i).getGrandTotal());
+				cmpmodel.setDifference(
+						Math.abs(emplist.get(i).getTsProjectBillableHours() - (summarylist.get(i).getGrandTotal())));
+				String[] date = emplist.get(i).getDateRange().split("-", 7);
+				cmpmodel.setFromDate(date[0] + "-".concat(date[1]) + "-".concat(date[2]));
+				cmpmodel.setToDate(date[3] + "-".concat(date[4]) + "-".concat(date[5]));
+				comparelist1.add(cmpmodel);
+				compareRepository.save(cmpmodel);
+			} else {
+				System.out.println("User Not Present");
+			}
 
 		}
 		comparelist.clear();
@@ -197,5 +199,4 @@ public class ReadService {
 		return comparelist;
 	}
 
-	
 }

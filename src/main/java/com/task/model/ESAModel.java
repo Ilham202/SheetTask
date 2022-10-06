@@ -1,5 +1,7 @@
 package com.task.model;
 
+import java.util.Comparator;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,5 +35,14 @@ public class ESAModel {
 	private String deferBilling;
 	private String deferDate;
 	private String correctionAtStore;
+
+	public static Comparator<ESAModel> empIdCompare = new Comparator<ESAModel>() {
+		@Override
+		public int compare(ESAModel o1, ESAModel o2) {
+			int eid1 = o1.getEmpId();
+			int eid2 = o2.getEmpId();
+			return eid1 - eid2;
+		}
+	};
 
 }

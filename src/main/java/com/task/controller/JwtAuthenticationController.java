@@ -51,27 +51,6 @@ public class JwtAuthenticationController {
 				.ok( new JwtResponse(token,userDetailsService.getUserId(authenticationRequest.getUsername())));
 	}
 	
-	
-
-	/*@CrossOrigin
-	@GetMapping(value = "/validate")
-	public ResponseEntity<Object> getValidity(@RequestHeader("Authorization") final String token, @RequestBody JwtRequest authenticationRequest) {
-		//Returns response after Validating received token
-		String token1 = token.substring(7);
-		AuthResponse res = new AuthResponse();
-		final UserDetails userDetails = userDetailsService
-				.loadUserByUsername(authenticationRequest.getUsername());
-		if (Boolean.TRUE.equals(jwtTokenUtil.validateToken(token1,userDetails))) {
-			Users s=UserService.getByUsername(jwtTokenUtil.getUsernameFromToken(token1));
-			res.setIsValid(true);
-			res.setUsername(jwtTokenUtil.getUsernameFromToken(token1));
-		} else {
-			res.setIsValid(false);
-		}
-		return new ResponseEntity<>(res, HttpStatus.OK);
-
-	}*/
-	
 
 	private void authenticate(String username, String password) {
 		Objects.requireNonNull(username);
