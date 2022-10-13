@@ -1,5 +1,6 @@
 package com.task.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -65,24 +66,29 @@ public class ReadController {
 	}
 
 	@PostMapping("/readesasheet")
-	public List<ESAModel> readEsaDataModel(@RequestParam("file") MultipartFile excel) throws IOException {
-		return readService.readEsaDataModel(excel);
+	public List<ESAModel> readEsaDataModel(@RequestParam("file") MultipartFile excel)
+			throws IOException, FileFormatException {
+		try {
+			List<ESAModel> list = readService.readEsaDataModel(excel);
+			return list;
+		} catch (Exception e) {
+			throw new FileFormatException("Please upload correct format file");
+		}
 
 	}
 
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/comparetwosheets")
 	public List<CompareModel> compareSheets(@RequestParam("Summary") MultipartFile excel1,
-			@RequestParam("ESA") MultipartFile excel2) throws IOException, ServletException, ParseException {
-		String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-		if (TYPE.equals(excel1.getContentType()) && TYPE.equals(excel2.getContentType())) {
+			@RequestParam("ESA") MultipartFile excel2,@RequestParam("ProjectId") String projectId)
+			throws IOException, ServletException, ParseException, FileFormatException {
+		try {
 			readService.readSheetModelData(excel1);
 			readService.readEsaDataModel(excel2);
 			return readService.compareSheets();
-		}else {
-			throw new FileFormatException("Please Upload .xlsx format file");
+		} catch (Exception e) {
+			throw new FileFormatException("Please upload correct format files");
 		}
-		
 
 	}
 
